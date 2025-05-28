@@ -1,22 +1,25 @@
 import tempfile
 import zipfile
 from pathlib import Path
+import wget
 
 import polars as pl
 
-URL_PATH = "./fc.zip"
+URL_FILE = "https://github.com/thiagodiasbispo/FatorCapaciidade/raw/refs/heads/main/fc.zip"
 FILE_NAME = "fc.csv"
 
 
 def download_data():
-    pass
+    zip_file =  Path(tempfile.mktemp(suffix=".zip"))
+    wget.download(URL_FILE, str(zip_file))
+    csv_file = Path(tempfile.gettempdir()) / FILE_NAME
+    zipfile.ZipFile(zip_file).extractall(tempfile.gettempdir())
+    return csv_file
 
 
 def ler_dados_fc():
-    download_data()
-    file = Path(tempfile.gettempdir()) / FILE_NAME
-    zipfile.ZipFile(URL_PATH).extractall(tempfile.gettempdir())
-    df = pl.read_csv(file).to_pandas()
+    arquivo_csv = download_data()
+    df = pl.read_csv(arquivo_csv).to_pandas()
 
     if "level_0" in df.columns:
         df = df.drop(columns=["level_0"])
